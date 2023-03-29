@@ -1,23 +1,20 @@
 <?php
+/**
+ * CoreShop.
+ *
+ * This source file is subject to the GNU General Public License version 3 (GPLv3)
+ * For the full copyright and license information, please view the LICENSE.md and gpl-3.0.txt
+ * files that are distributed with this source code.
+ *
+ * @copyright  Copyright (c) 2015-2020 Dominik Pfaffenbauer (https://www.pfaffenbauer.at)
+ * @license    https://www.coreshop.org/license     GNU General Public License version 3 (GPLv3)
+ */
 
 declare(strict_types=1);
 
-/*
- * CoreShop
- *
- * This source file is available under two different licenses:
- *  - GNU General Public License version 3 (GPLv3)
- *  - CoreShop Commercial License (CCL)
- * Full copyright and license information is available in
- * LICENSE.md which is distributed with this source code.
- *
- * @copyright  Copyright (c) CoreShop GmbH (https://www.coreshop.org)
- * @license    https://www.coreshop.org/license     GPLv3 and CCL
- *
- */
-
 namespace CoreShop\Component\Index\Filter;
 
+use CoreShop\Component\Index\Condition\ConcatCondition;
 use CoreShop\Component\Index\Condition\InCondition;
 use CoreShop\Component\Index\Condition\LikeCondition;
 use CoreShop\Component\Index\Listing\ListingInterface;
@@ -26,20 +23,15 @@ use CoreShop\Component\Index\Model\FilterInterface;
 use Pimcore\Model\DataObject\QuantityValue\Unit;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
-class SelectFilterConditionFromMultiselectProcessor implements FilterConditionProcessorInterface
+class MultiselectFilterConditionFromMultiselectProcessor implements FilterConditionProcessorInterface
 {
     public function prepareValuesForRendering(FilterConditionInterface $condition, FilterInterface $filter, ListingInterface $list, array $currentFilter): array
     {
         $field = $condition->getConfiguration()['field'];
-
         $rawValues = $list->getGroupByValues($field, true);
         $values = [];
 
         foreach ($rawValues as $v) {
-            if ($v['value'] === null) {
-                continue;
-            }
-
             $explode = explode(',', $v['value']);
 
             foreach ($explode as $e) {
@@ -47,9 +39,8 @@ class SelectFilterConditionFromMultiselectProcessor implements FilterConditionPr
                     continue;
                 }
 
-                if (array_key_exists($e, $values)) {
+                if ($values[$e]) {
                     $values[$e]['count'] += $v['count'];
-
                     continue;
                 }
 
@@ -57,48 +48,47 @@ class SelectFilterConditionFromMultiselectProcessor implements FilterConditionPr
             }
         }
 
-        $currentValue = $currentFilter[$field] ?? null;
-
-        if (is_string($currentValue)) {
-            $currentValue = trim($currentValue, ',');
-        }
-
         return [
-            'type' => 'select',
+            'type' => 'multiselect',
             'label' => $condition->getLabel(),
-            'currentValue' => $currentValue,
+            'currentValues' => array_map(function($value) {
+                return trim($value, ',');
+            }, $currentFilter[$field] ?: []),
             'values' => array_values($values),
             'fieldName' => $field,
-            'quantityUnit' => $condition->getQuantityUnit() ? Unit::getById($condition->getQuantityUnit()) : null,
+            'quantityUnit' => Unit::getById($condition->getQuantityUnit()),
         ];
     }
 
     public function addCondition(FilterConditionInterface $condition, FilterInterface $filter, ListingInterface $list, array $currentFilter, ParameterBag $parameterBag, bool $isPrecondition = false): array
     {
         $field = $condition->getConfiguration()['field'];
-        $value = $parameterBag->get($field);
+        $values = $parameterBag->get($field);
 
-        if (empty($value)) {
-            $value = $condition->getConfiguration()['preSelect'];
+        if (empty($values)) {
+            $values = $condition->getConfiguration()['preSelects'];
         }
 
-        if (is_string($value)) {
-            $value = trim($value);
+        $currentFilter[$field] = $values;
+
+        if ($values === static::EMPTY_STRING) {
+            $values = null;
         }
 
-        if (!empty($value)) {
-
+        if (!empty($values)) {
             $fieldName = $isPrecondition ? 'PRECONDITION_' . $field : $field;
 
-            if (is_array($value)) {
-                $list->addCondition(new InCondition($field, $value), $fieldName);
-            } else {
-                $value = ',' . $value . ',';
+            $likeConditions = [];
 
-                $currentFilter[$field] = $value;
+            foreach ($values as $v) {
+                $v = ',' . $v . ',' ;
 
-                $list->addCondition(new LikeCondition($field, 'both', $value), $fieldName);
+                $likeConditions[] = new LikeCondition($field, 'both', $v);
             }
+
+            unset ($v);
+
+            $list->addCondition(new ConcatCondition($field, 'OR', $likeConditions), $fieldName);
         }
 
         return $currentFilter;
