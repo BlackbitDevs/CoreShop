@@ -23,7 +23,9 @@ use CoreShop\Component\Pimcore\Slug\SluggableInterface;
 use Pimcore\Model\DataObject\Data\UrlSlug;
 use Pimcore\Model\Document;
 use Pimcore\Model\Site;
+use Pimcore\Model\Staticroute;
 use Pimcore\Tool;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Twig\Extension\AbstractExtension;
@@ -35,6 +37,7 @@ final class LocaleSwitcherExtension extends AbstractExtension
         private Document\Service $documentService,
         private ShopperContextInterface $shopperContext,
         private RequestStack $requestStack,
+        protected ContainerInterface $container,
     ) {
     }
 
@@ -84,16 +87,31 @@ final class LocaleSwitcherExtension extends AbstractExtension
                 continue;
             }
 
-            if (isset($translations[$language])) {
-                $localizedDocument = Document::getById($translations[$language]);
+            $link = '';
+            if ($this->getMainRequest()->attributes->get('pimcore_request_source') === 'staticroute') {
+                $route = $this->getMainRequest()->attributes->get('_route');
+                $staticRoute = Staticroute::getByName($route);
+                $params = [];
+                if (strpos($staticRoute->getVariables(), '_locale')) {
+                    $params = ['_locale' => $language];
+                }
+                $link = $this->container->get('router')->generate($route, $params);
             } else {
-                $localizedDocument = Document::getByPath($target);
+                if ( isset($translations[$language]) ) {
+                    $localizedDocument = Document::getById($translations[$language]);
+                } else {
+                    $localizedDocument = Document::getByPath($target);
+                }
+
+                if ( $localizedDocument instanceof Document && $localizedDocument->getPublished() ) {
+                    $link = $localizedDocument->getFullPath();
+                }
             }
 
-            if ($localizedDocument instanceof Document && $localizedDocument->getPublished()) {
+            if (!empty($link)) {
                 $links[] = [
                     'language' => $language,
-                    'target' => $localizedDocument->getFullPath(),
+                    'target' => $link,
                     'displayLanguage' => \Locale::getDisplayLanguage($language, $language),
                 ];
             }
