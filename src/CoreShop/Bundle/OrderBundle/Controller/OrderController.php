@@ -56,6 +56,7 @@ use Pimcore\Model\User;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Workflow\StateMachine;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
@@ -67,7 +68,7 @@ class OrderController extends PimcoreController
 
     protected AddressFormatterInterface $addressFormatter;
 
-    protected ArrayTransformerInterface $serializer;
+    protected SerializerInterface $jmsSerializer;
 
     protected WorkflowStateInfoManagerInterface $workflowStateManager;
 
@@ -354,7 +355,7 @@ class OrderController extends PimcoreController
 
     protected function getDetails(OrderInterface $order): array
     {
-        $jsonSale = $this->serializer->toArray($order);
+        $jsonSale = $this->jmsSerializer->toArray($order);
 
         $jsonSale['o_id'] = $order->getId();
         $jsonSale['saleNumber'] = $order->getOrderNumber();
@@ -483,7 +484,7 @@ class OrderController extends PimcoreController
                 'cancel',
             ], false);
 
-            $data = $this->serializer->toArray($invoice);
+            $data = $this->jmsSerializer->toArray($invoice);
 
             $data['stateInfo'] = $this->workflowStateManager->getStateInfo('coreshop_invoice', $invoice->getState(), false);
             $data['transitions'] = $availableTransitions;
@@ -506,7 +507,7 @@ class OrderController extends PimcoreController
                 'cancel',
             ], false);
 
-            $data = $this->serializer->toArray($shipment);
+            $data = $this->jmsSerializer->toArray($shipment);
 
             $data['stateInfo'] = $this->workflowStateManager->getStateInfo('coreshop_shipment', $shipment->getState(), false);
             $data['transitions'] = $availableTransitions;
@@ -742,9 +743,9 @@ class OrderController extends PimcoreController
         $this->addressFormatter = $addressFormatter;
     }
 
-    public function setSerializer(ArrayTransformerInterface $serializer): void
+    public function setJmsSerializer(SerializerInterface $jmsSerializer): void
     {
-        $this->serializer = $serializer;
+        $this->jmsSerializer = $jmsSerializer;
     }
 
     public function setWorkflowStateManager(WorkflowStateInfoManagerInterface $workflowStateManager): void
