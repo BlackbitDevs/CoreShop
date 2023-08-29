@@ -67,7 +67,7 @@ class OrderController extends PimcoreController
 
     protected AddressFormatterInterface $addressFormatter;
 
-    protected ArrayTransformerInterface $serializer;
+    protected ArrayTransformerInterface $jmsSerializer;
 
     protected WorkflowStateInfoManagerInterface $workflowStateManager;
 
@@ -354,7 +354,7 @@ class OrderController extends PimcoreController
 
     protected function getDetails(OrderInterface $order): array
     {
-        $jsonSale = $this->serializer->toArray($order);
+        $jsonSale = $this->jmsSerializer->toArray($order);
 
         $jsonSale['o_id'] = $order->getId();
         $jsonSale['saleNumber'] = $order->getOrderNumber();
@@ -483,7 +483,7 @@ class OrderController extends PimcoreController
                 'cancel',
             ], false);
 
-            $data = $this->serializer->toArray($invoice);
+            $data = $this->jmsSerializer->toArray($invoice);
 
             $data['stateInfo'] = $this->workflowStateManager->getStateInfo('coreshop_invoice', $invoice->getState(), false);
             $data['transitions'] = $availableTransitions;
@@ -506,7 +506,7 @@ class OrderController extends PimcoreController
                 'cancel',
             ], false);
 
-            $data = $this->serializer->toArray($shipment);
+            $data = $this->jmsSerializer->toArray($shipment);
 
             $data['stateInfo'] = $this->workflowStateManager->getStateInfo('coreshop_shipment', $shipment->getState(), false);
             $data['transitions'] = $availableTransitions;
@@ -608,7 +608,7 @@ class OrderController extends PimcoreController
                 'avatar' => $avatar,
                 'user' => $user ? $user->getName() : null,
                 'description' => $note->getDescription(),
-                'title' => $note->getTitle(),
+                'title' => $note->getDescription(),
                 'data' => $note->getData(),
             ];
         }
@@ -624,26 +624,17 @@ class OrderController extends PimcoreController
         foreach ($payments as $payment) {
             $details = [];
             foreach ($payment->getDetails() as $detailName => $detailValue) {
-                if (empty($detailValue) && $detailValue !== 0) {
+                $parsedDetailLine = $this->parsePaymentDetailLine($detailValue);
+
+                if (null === $parsedDetailLine) {
                     continue;
                 }
-                if (is_array($detailValue)) {
-                    $detailValue = implode(', ', $detailValue);
-                }
 
-                if (true === is_bool($detailValue)) {
-                    if (true === $detailValue) {
-                        $detailValue = 'true';
-                    } else {
-                        $detailValue = 'false';
-                    }
-                }
-
-                if (false === is_string($detailValue)) {
-                    $detailValue = (string) $detailValue;
-                }
-
-                $details[] = [$detailName, $detailValue ? htmlentities($detailValue) : ''];
+                $details[] = [
+                    'name' => $detailName,
+                    'value' => $parsedDetailLine['value'],
+                    'detail' => $parsedDetailLine['detail'],
+                ];
             }
 
             $availableTransitions = $this->workflowStateManager->parseTransitions($payment, 'coreshop_payment', [
@@ -696,6 +687,46 @@ class OrderController extends PimcoreController
         return [];
     }
 
+    protected function parsePaymentDetailLine(mixed $data): ?array
+    {
+        $detail = null;
+
+        if (empty($data) && $data !== 0) {
+            return null;
+        }
+
+        if (is_array($data)) {
+            if (count(
+                array_filter($data, static function ($row) {
+                    return is_array($row);
+                }),
+            ) > 0) {
+                // we don't support sub arrays
+                $detail = htmlentities(json_encode($data, \JSON_THROW_ON_ERROR));
+                $data = '';
+            } else {
+                $data = implode(', ', $data);
+            }
+        }
+
+        if (true === is_bool($data)) {
+            if (true === $data) {
+                $data = 'true';
+            } else {
+                $data = 'false';
+            }
+        }
+
+        if (false === is_string($data)) {
+            $data = (string) $data;
+        }
+
+        return [
+            'value' => htmlentities($data),
+            'detail' => $detail,
+        ];
+    }
+
     public function setEventDispatcher(EventDispatcherInterface $eventDispatcher): void
     {
         $this->eventDispatcher = $eventDispatcher;
@@ -711,9 +742,9 @@ class OrderController extends PimcoreController
         $this->addressFormatter = $addressFormatter;
     }
 
-    public function setSerializer(ArrayTransformerInterface $serializer): void
+    public function setJmsSerializer(ArrayTransformerInterface $jmsSerializer): void
     {
-        $this->serializer = $serializer;
+        $this->jmsSerializer = $jmsSerializer;
     }
 
     public function setWorkflowStateManager(WorkflowStateInfoManagerInterface $workflowStateManager): void

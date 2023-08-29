@@ -18,14 +18,18 @@ declare(strict_types=1);
 
 namespace CoreShop\Bundle\CoreBundle\Pimcore\Repository;
 
+use CoreShop\Bundle\WishlistBundle\Pimcore\Repository\WishlistRepository as BaseWishlistRepository;
 use CoreShop\Component\Core\Wishlist\Repository\WishlistRepositoryInterface;
 use CoreShop\Component\Customer\Model\CustomerInterface;
+use CoreShop\Component\StorageList\Repository\CustomerExpiryRepositoryTrait;
 use CoreShop\Component\StorageList\Model\StorageListInterface;
 use CoreShop\Component\Store\Model\StoreInterface;
 use CoreShop\Component\Wishlist\Model\WishlistInterface;
 
-class WishlistRepository extends \CoreShop\Bundle\WishlistBundle\Pimcore\Repository\WishlistRepository implements WishlistRepositoryInterface
+class WishlistRepository extends BaseWishlistRepository implements WishlistRepositoryInterface
 {
+    use CustomerExpiryRepositoryTrait;
+
     public function findNamedStorageLists(StoreInterface $store, CustomerInterface $customer): array
     {
         $list = $this->getList();

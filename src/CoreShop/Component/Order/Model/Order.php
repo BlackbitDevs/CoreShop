@@ -40,7 +40,12 @@ abstract class Order extends AbstractPimcoreModel implements OrderInterface
 
     public function addItem($item): void
     {
+        /**
+         * @var OrderItemInterface $item
+         */
         Assert::isInstanceOf($item, OrderItemInterface::class);
+
+        $item->setOrder($this);
 
         $items = $this->getItems();
         $items[] = $item;
@@ -158,6 +163,11 @@ abstract class Order extends AbstractPimcoreModel implements OrderInterface
     public function getConvertedShipping(bool $withTax = true): int
     {
         return $this->getConvertedAdjustmentsTotal(AdjustmentInterface::SHIPPING, $withTax);
+    }
+
+    public function getConvertedPaymentProviderFee(): int
+    {
+        return $this->getConvertedAdjustmentsTotal(AdjustmentInterface::PAYMENT, false);
     }
 
     public function getTotalNet(): int

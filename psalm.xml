@@ -8,6 +8,7 @@
         <directory name="src" />
         <ignoreFiles>
             <file name="src/Kernel.php" />
+            <file name="src/CoreShop/Bundle/ResourceBundle/Doctrine/ORM/EntityMerger.php" />
 
             <directory name="src/CoreShop/Component/Resource/DataHub" />
             <directory name="src/CoreShop/Bundle/*/DataHub" />
@@ -50,6 +51,12 @@
                 <referencedClass name="Symfony\Component\Security\Core\Role\Role" />
                 <referencedClass name="Symfony\Component\Translation\TranslatorInterface" />
                 <referencedClass name="Symfony\Bundle\WebServerBundle\WebServerBundle" />
+                <referencedClass name="Pimcore\Event\BundleManagerEvents" />
+                <referencedClass name="Pimcore\Event\Model\DataObjectDeleteInfoEvent" />
+                <referencedClass name="Pimcore\Event\AdminEvents" />
+                <referencedClass name="Pimcore\Bundle\AdminBundle\Security\User\TokenStorageUserResolver" />
+                <referencedClass name="Pimcore\Bundle\AdminBundle\Controller\AdminController" />
+                <referencedClass name="Pimcore\Bundle\AdminBundle\Security\User\User" />
             </errorLevel>
         </DeprecatedClass>
         <DeprecatedInterface>
@@ -58,6 +65,7 @@
                 <referencedClass name="Doctrine\Common\Persistence\ObjectRepository" />
                 <referencedClass name="Sylius\Component\Core\Calculator\ProductVariantPriceCalculatorInterface" />
                 <referencedClass name="Symfony\Component\Security\Core\User\AdvancedUserInterface" />
+                <referencedClass name="Pimcore\Bundle\AdminBundle\Controller\AdminControllerInterface" />
             </errorLevel>
         </DeprecatedInterface>
         <DeprecatedMethod>
@@ -71,6 +79,8 @@
                 <referencedMethod name="Symfony\Component\Intl\Intl::getRegionBundle" />
                 <referencedMethod name="Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent::getException" />
                 <referencedMethod name="Symfony\Bundle\FrameworkBundle\Controller\AbstractController::get" />
+                <referencedMethod name="Pimcore\Bundle\AdminBundle\Controller\AdminController::decodeJson" />
+                <referencedMethod name="Pimcore\Bundle\AdminBundle\Controller\AdminController::getAdminUser" />
             </errorLevel>
         </DeprecatedMethod>
 

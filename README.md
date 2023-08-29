@@ -4,10 +4,9 @@
 
 **CoreShop - Pimcore eCommerce**
 
-[![Join the chat at https://gitter.im/coreshop/coreshop](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/coreshop/coreshop?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-![Behat UI Tests](https://github.com/coreshop/CoreShop/workflows/PHP%20Stan/badge.svg)
+![Static Tests (Lint, Stan)](https://github.com/coreshop/CoreShop/actions/workflows/static.yml/badge.svg)
 ![Behat UI Tests](https://github.com/coreshop/CoreShop/workflows/Behat%20UI/badge.svg)
-![Behat UI Tests](https://github.com/coreshop/CoreShop/workflows/Behat/badge.svg)
+![Behat Tests](https://github.com/coreshop/CoreShop/workflows/Behat/badge.svg)
 [![Software License](https://img.shields.io/badge/license-GPLv3-brightgreen.svg?style=flat)](LICENSE.md)
 [![Latest Pre-Release](https://img.shields.io/packagist/vpre/coreshop/core-shop.svg)](https://www.packagist.org/packages/coreshop/core-shop)
 
@@ -52,12 +51,12 @@ bin/console messenger:consume coreshop_notification coreshop_index --time-limit=
  - [Pimcore Forum](https://talk.pimcore.org)
 
 # Demo
-You can see a running demo here [CoreShop 3.x Demo](https://demox.coreshop.org)
+You can see a running demo here [CoreShop 3.x Demo](https://demo3.coreshop.org)
 
 **Backend Credentials**
 
 ```
-Admin: https://demox.coreshop.org/admin
+Admin: https://demo3.coreshop.org/admin
 
 Username: admin
 Password: coreshop

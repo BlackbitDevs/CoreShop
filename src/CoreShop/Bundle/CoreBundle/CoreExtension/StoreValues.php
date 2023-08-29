@@ -243,12 +243,12 @@ class StoreValues extends Model\DataObject\ClassDefinition\Data implements
             $this->getTitle(),
         ) . "\n";
         $code .= '*' . "\n";
-        $code .= '* @param \CoreShop\Component\Core\Model\ProductStoreValuesInterface $storeValues' . "\n";
+        $code .= '* @param \CoreShop\Component\Core\Model\ProductStoreValuesInterface $' . $key . "\n";
         $code .= '* @param \CoreShop\Component\Store\Model\StoreInterface $store' . "\n";
         $code .= '*' . "\n";
         $code .= '* @return static' . "\n";
         $code .= '*/' . "\n";
-        $code .= 'public function set' . ucfirst($key) . 'ForStore(\CoreShop\Component\Core\Model\ProductStoreValuesInterface $storeValues, \CoreShop\Component\Store\Model\StoreInterface $store): self {' . "\n";
+        $code .= 'public function set' . ucfirst($key) . 'ForStore(\CoreShop\Component\Core\Model\ProductStoreValuesInterface $' . $key . ', \CoreShop\Component\Store\Model\StoreInterface $store): self {' . "\n";
         $code .= "\t" . '$this->' . $key . '[$store->getId()] = $' . $key . ';' . "\n";
         $code .= "\t" . '$this->' . $key . ' = ' . '$this->getClass()->getFieldDefinition("' . $key . '")->preSetData($this, $this->' . $key . ');' . "\n";
         $code .= "\t" . 'return $this;' . "\n";
@@ -261,11 +261,11 @@ class StoreValues extends Model\DataObject\ClassDefinition\Data implements
             $this->getTitle(),
         ) . "\n";
         $code .= '*' . "\n";
-        $code .= '* @param \CoreShop\Component\Core\Model\ProductStoreValuesInterface[] $storeValues' . "\n";
+        $code .= '* @param \CoreShop\Component\Core\Model\ProductStoreValuesInterface[] $' . $key . "\n";
         $code .= '*' . "\n";
         $code .= '* @return static' . "\n";
         $code .= '*/' . "\n";
-        $code .= 'public function set' . ucfirst($key) . ' (array $storeValues): self {' . "\n";
+        $code .= 'public function set' . ucfirst($key) . ' (array $' . $key . '): self {' . "\n";
         $code .= "\t" . '$this->' . $key . ' = $' . $key . ';' . "\n";
         $code .= "\t" . '$this->' . $key . ' = ' . '$this->getClass()->getFieldDefinition("' . $key . '")->preSetData($this, $this->' . $key . ');' . "\n";
         $code .= "\t" . 'return $this;' . "\n";
@@ -624,10 +624,12 @@ class StoreValues extends Model\DataObject\ClassDefinition\Data implements
                 continue;
             }
 
+            $currency = $store->getCurrency();
+
             //Fill missing stores with empty values
             $storeData[$store->getId()] = [
                 'name' => $store->getName(),
-                'currencySymbol' => $store->getCurrency()->getSymbol(),
+                'currencySymbol' => $currency?->getSymbol() ?? '',
                 'values' => ['price' => 0],
                 'inheritable' => $inheritable,
             ];
