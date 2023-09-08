@@ -78,14 +78,5 @@ final class SessionStoreStorageListSubscriber implements EventSubscriberInterfac
         if (0 !== $storageList->getId() && null !== $storageList->getStore()) {
             $this->storageListStorage->setForContext(['store' => $storageList->getStore()], $storageList);
         }
-
-        if (0 !== $storageList->getId() && null !== $storageList->getId() && null !== $storageList->getStore()) {
-            $session = $request->getSession();
-
-            $session->set(
-                sprintf('%s.%s', $this->sessionKeyName, $storageList->getStore()->getId()),
-                $storageList->getId(),
-            );
-        }
     }
 }
