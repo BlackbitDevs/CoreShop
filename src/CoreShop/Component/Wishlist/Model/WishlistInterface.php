@@ -18,18 +18,22 @@ declare(strict_types=1);
 
 namespace CoreShop\Component\Wishlist\Model;
 
+use CoreShop\Component\Customer\Model\CustomerAwareInterface;
 use CoreShop\Component\Resource\Pimcore\Model\PimcoreModelInterface;
 use CoreShop\Component\StorageList\Model\NameableStorageListInterface;
 use CoreShop\Component\StorageList\Model\ShareableStorageListInterface;
 use CoreShop\Component\StorageList\Model\StorageListInterface;
 use CoreShop\Component\StorageList\Model\TokenAwareStorageListInterface;
+use CoreShop\Component\Store\Model\StoreAwareInterface;
 
 interface WishlistInterface extends
     PimcoreModelInterface,
     StorageListInterface,
     TokenAwareStorageListInterface,
     ShareableStorageListInterface,
-    NameableStorageListInterface
+    NameableStorageListInterface,
+    StoreAwareInterface,
+    CustomerAwareInterface
 {
     /**
      * @return WishlistItemInterface[]|null
