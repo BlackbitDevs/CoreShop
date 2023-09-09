@@ -274,4 +274,32 @@ routes:
     variables: _locale,item
     priority: 3
 
+  coreshop_partial_selectable_wishlist_add:
+    pattern: '/(\w+)\/_partial\/selectable_wishlist\/add\/([0-9]+)$/'
+    reverse: '/%_locale/_partial/selectable_wishlist/add/%product'
+    controller: 'coreshop.storage_list.controller.wishlist:addItemToNamedListAction'
+    variables: _locale,product
+    priority: 3
+
+  coreshop_partial_new_wishlist_add:
+    pattern: '/(\w+)\/_partial\/new_wishlist\/add\/([0-9]+)$/'
+    reverse: '/%_locale/_partial/new_wishlist/add/%product'
+    controller: 'coreshop.storage_list.controller.wishlist:addToNewNamedListAction'
+    variables: _locale,product
+    priority: 3
+
+  coreshop_new_wishlist_add:
+    pattern: '/(\w+)\/shop\/new\/wishlist\/add\/([0-9]+)$/'
+    reverse: '/%_locale/shop/new/wishlist/add/%product'
+    controller: 'coreshop.storage_list.controller.wishlist:addToNewNamedListAction'
+    variables: _locale,product
+    priority: 3
+
+  coreshop_selectable_wishlist_add:
+    pattern: '/(\w+)\/selectable_wishlist\/add\/([0-9]+)$/'
+    reverse: '/%_locale/selectable_wishlist/add/%product'
+    controller: 'coreshop.storage_list.controller.wishlist:addItemToNamedListAction'
+    variables: _locale,product
+    priority: 3
+
 
