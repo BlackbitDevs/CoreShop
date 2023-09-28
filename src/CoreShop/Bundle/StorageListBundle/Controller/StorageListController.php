@@ -436,6 +436,12 @@ class StorageListController extends AbstractController
 
                     $this->manager->persist($list);
 
+                    if ($request->isXmlHttpRequest()) {
+                        return new JsonResponse([
+                            'success' => true,
+                        ]);
+                    }
+
                     return $this->redirectToRoute($this->summaryRoute);
                 }
 
@@ -449,6 +455,15 @@ class StorageListController extends AbstractController
                         $session->getFlashBag()->add('error', $error->getMessage());
                     }
 
+                    if ($request->isXmlHttpRequest()) {
+                        return new JsonResponse([
+                            'success' => false,
+                            'errors' => array_map(static function (FormError $error) {
+                                return $error->getMessage();
+                            }, iterator_to_array($form->getErrors(true))),
+                        ]);
+                    }
+
                     return $this->redirectToRoute($this->summaryRoute);
                 }
             }
@@ -458,6 +473,12 @@ class StorageListController extends AbstractController
 
         if (!$isSharedList && $list instanceof ShareableStorageListInterface && $list->listCanBeShared()) {
             $params['share_link'] = $this->generateUrl($this->summaryRoute, ['identifier' => $list->getToken()], UrlGeneratorInterface::ABSOLUTE_URL);
+        }
+
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse([
+                'success' => false,
+            ]);
         }
 
         return $this->render($this->templateSummary, $params);
