@@ -84,8 +84,14 @@ final class StoreBasedCartContext implements CartContextInterface
 
         $defaultAddress = $customer->getDefaultAddress();
         if (null !== $defaultAddress) {
-            $cart->setShippingAddress($defaultAddress);
-            $cart->setInvoiceAddress($defaultAddress);
+
+            if (!$cart->getShippingAddress()) {
+                $cart->setShippingAddress($defaultAddress);
+            }
+
+            if (!$cart->getInvoiceAddress()) {
+                $cart->setInvoiceAddress($defaultAddress);
+            }
         }
     }
 }
