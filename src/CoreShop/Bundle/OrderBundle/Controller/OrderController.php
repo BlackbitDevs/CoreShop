@@ -56,7 +56,7 @@ use Pimcore\Model\User;
 use Symfony\Component\EventDispatcher\GenericEvent;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Serializer\SerializerInterface;
+use JMS\Serializer\SerializerInterface;
 use Symfony\Component\Workflow\StateMachine;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 
